@@ -2,7 +2,13 @@ import inputgen
 import log
 import model as nn
 import cupy as np
-import random
+import uuid
+import sys
+
+# How to use: run.py <model file>
+
+# Getting all arguments from terminal
+argv = sys.argv
 
 def rgb_to_hex(r, g, b):
     """Convert an RGB color tuple to a hexadecimal string"""
@@ -21,8 +27,12 @@ def rgb_to_hex(r, g, b):
 
 log.info("Starting XAML-STYLEGEN")
 
-model = nn.load_model("xaml-stylegen.h5")
-log.info("Loaded model xaml-stylegen.h5")
+if not len(argv) > 1:
+    log.error("The first required argument is missing: the name of the model file without extension in the models folder")
+    sys.exit(1)
+else:
+    model = nn.load_model(f"models\\{argv[1]}.h5")
+    log.info(f"Loaded model {argv[1]}.h5")
 
 rng = int(input("How many styles you need to generate: "))
 log.info("Generating xml style files")
@@ -78,7 +88,7 @@ for i in range(rng):
             </EventTrigger.Actions>
     </EventTrigger>"""
 
-    with open(f'outputs\\{random.randint(0,999_999_999)}.xml', 'w') as xml:
+    with open(f'outputs\\{str(uuid.uuid4())}.xml', 'w') as xml:
         xml.write(
         f'''<Style x:Key="CustomButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="{rgb_to_hex(int(predictions_res[0][0]), int(predictions_res[0][1]), int(predictions_res[0][2]))}" />

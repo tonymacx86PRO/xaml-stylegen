@@ -1,10 +1,10 @@
 # Neuronal network structure
 
-## Inputs and outputs
+## Features and labels
 
-Input: Any size random normalized integers
+Features: Random normalized integers
 
-Output:
+Labels:
 
 1. Vector3(r,g,b) int - Background (Min: 0, Max: 255)
 2. Vector3(r,g,b) int - Foreground (Min: 0, Max: 255)

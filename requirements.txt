@@ -1,1 +1,3 @@
 cupy
+pandas
+numpy

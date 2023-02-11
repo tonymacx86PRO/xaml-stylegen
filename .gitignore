@@ -1,2 +1,6 @@
-/xaml-stylegen.h5
 /__pycache__
+/outputs
+/labels
+/models
+/.vscode
+snippet.xml
