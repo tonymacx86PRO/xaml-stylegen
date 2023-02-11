@@ -4,11 +4,38 @@ import model as nn
 import cupy as np
 import uuid
 import sys
+import os
+from tqdm.auto import tqdm
 
 # How to use: run.py <model file>
 
 # Getting all arguments from terminal
 argv = sys.argv
+
+def tensorflow_shutup():
+    """
+    Make Tensorflow less verbose
+    """
+    try:
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+        # noinspection PyPackageRequirements
+        import tensorflow as tf
+        from tensorflow.python.util import deprecation
+
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+        # Monkey patching deprecation utils to shut it up! Maybe good idea to disable this once after upgrade
+        # noinspection PyUnusedLocal
+        def deprecated(date, instructions, warn_once=True):  # pylint: disable=unused-argument
+            def deprecated_wrapper(func):
+                return func
+            return deprecated_wrapper
+
+        deprecation.deprecated = deprecated
+
+    except ImportError:
+        pass
 
 def rgb_to_hex(r, g, b):
     """Convert an RGB color tuple to a hexadecimal string"""
@@ -24,6 +51,7 @@ def rgb_to_hex(r, g, b):
     hex_b = hex(b)[2:].zfill(2)
     # Concatenate the hex strings into a single hexadecimal string
     return f"#{hex_r}{hex_g}{hex_b}"
+tensorflow_shutup()
 
 log.info("Starting XAML-STYLEGEN")
 
@@ -36,7 +64,7 @@ else:
 
 rng = int(input("How many styles you need to generate: "))
 log.info("Generating xml style files")
-for i in range(rng):
+for i in tqdm(range(rng)):
     x = inputgen.generate_inputs(nn.get_batch_size()).get()
     indices = np.arange(x.shape[0])
     np.random.shuffle(indices)
@@ -50,12 +78,12 @@ for i in range(rng):
 
     isfocused = f"""<Trigger Property="Button.IsFocused" Value="True">
     <Setter TargetName="border" Property="BorderThickness" Value="{int(predictions_res[0][13])}" />
-        <Setter TargetName="border" Property="BorderBrush" Value="{rgb_to_hex(int(predictions_res[0][14]), int(predictions_res[0][15]), int(predictions_res[0][16]))}" />
+    <Setter TargetName="border" Property="BorderBrush" Value="{rgb_to_hex(int(predictions_res[0][14]), int(predictions_res[0][15]), int(predictions_res[0][16]))}" />
     </Trigger>"""
 
     isenabled = f"""<Trigger Property="Button.IsEnabled" Value="False">
     <Setter Property="Background" Value="{rgb_to_hex(int(predictions_res[0][18]), int(predictions_res[0][19]), int(predictions_res[0][20]))}" />
-        <Setter TargetName="border" Property="BorderBrush" Value="{rgb_to_hex(int(predictions_res[0][21]), int(predictions_res[0][22]), int(predictions_res[0][23]))}" />
+    <Setter TargetName="border" Property="BorderBrush" Value="{rgb_to_hex(int(predictions_res[0][21]), int(predictions_res[0][22]), int(predictions_res[0][23]))}" />
     </Trigger>"""
 
     rounding = f"""<Style.Resources>
